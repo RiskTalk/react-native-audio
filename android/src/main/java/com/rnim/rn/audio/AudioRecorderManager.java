@@ -64,6 +64,7 @@ class AudioRecorderManager extends ReactContextBaseJavaModule {
   private boolean isPauseResumeCapable = false;
   private Method pauseMethod = null;
   private Method resumeMethod = null;
+  private int recorderSecondsElapsed;
 
 
   public AudioRecorderManager(ReactApplicationContext reactContext) {
@@ -209,7 +210,7 @@ class AudioRecorderManager extends ReactContextBaseJavaModule {
   @ReactMethod
   public void stopRecording(Promise promise){
     if (!isRecording){
-      logAndRejectPromise(promise, "INVALID_STATE", "Please call startRecording before stopping recording");
+     // logAndRejectPromise(promise, "INVALID_STATE", "Please call startRecording before stopping recording");
       return;
     }
 
@@ -312,13 +313,22 @@ class AudioRecorderManager extends ReactContextBaseJavaModule {
     timer.scheduleAtFixedRate(new TimerTask() {
       @Override
       public void run() {
-        if (!isPaused) {
-          WritableMap body = Arguments.createMap();
-          body.putDouble("currentTime", stopWatch.getTimeSeconds());
-          sendEvent("recordingProgress", body);
-        }
+        AudioRecorderManager.this.getReactApplicationContext().runOnNativeModulesQueueThread(new Runnable() {
+          @Override
+          public void run() {
+            recorderSecondsElapsed++;
+            WritableMap body = Arguments.createMap();
+            body.putInt("currentTime", recorderSecondsElapsed/4);
+            int maxAmplitude = 0;
+            if (recorder != null) {
+              maxAmplitude = recorder.getMaxAmplitude();
+            }
+            body.putInt("currentMetering", maxAmplitude);
+            sendEvent("recordingProgress", body);
+          }
+        });
       }
-    }, 0, 1000);
+    }, 0, 250);
   }
 
   private void stopTimer(){
