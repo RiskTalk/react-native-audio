@@ -132,7 +132,7 @@ class AudioRecorderManager extends ReactContextBaseJavaModule {
       includeBase64 = recordingSettings.getBoolean("IncludeBase64");
     }
     catch(final Exception e) {
-      logAndRejectPromise(promise, "COULDNT_CONFIGURE_MEDIA_RECORDER" , "Make sure you've added RECORD_AUDIO permission to your AndroidManifest.xml file "+e.getMessage());
+    //  logAndRejectPromise(promise, "COULDNT_CONFIGURE_MEDIA_RECORDER" , "Make sure you've added RECORD_AUDIO permission to your AndroidManifest.xml file "+e.getMessage());
       return;
     }
 
@@ -141,7 +141,7 @@ class AudioRecorderManager extends ReactContextBaseJavaModule {
       recorder.prepare();
       promise.resolve(currentOutputFile);
     } catch (final Exception e) {
-      logAndRejectPromise(promise, "COULDNT_PREPARE_RECORDING_AT_PATH "+recordingPath, e.getMessage());
+      // logAndRejectPromise(promise, "COULDNT_PREPARE_RECORDING_AT_PATH "+recordingPath, e.getMessage());
     }
 
   }
@@ -190,11 +190,11 @@ class AudioRecorderManager extends ReactContextBaseJavaModule {
   @ReactMethod
   public void startRecording(Promise promise){
     if (recorder == null){
-      logAndRejectPromise(promise, "RECORDING_NOT_PREPARED", "Please call prepareRecordingAtPath before starting recording");
+     // logAndRejectPromise(promise, "RECORDING_NOT_PREPARED", "Please call prepareRecordingAtPath before starting recording");
       return;
     }
     if (isRecording){
-      logAndRejectPromise(promise, "INVALID_STATE", "Please call stopRecording before starting recording");
+    //  logAndRejectPromise(promise, "INVALID_STATE", "Please call stopRecording before starting recording");
       return;
     }
     recorder.start();
@@ -225,7 +225,7 @@ class AudioRecorderManager extends ReactContextBaseJavaModule {
     }
     catch (final RuntimeException e) {
       // https://developer.android.com/reference/android/media/MediaRecorder.html#stop()
-      logAndRejectPromise(promise, "RUNTIME_EXCEPTION", "No valid audio data received. You may be using a device that can't record audio.");
+     // logAndRejectPromise(promise, "RUNTIME_EXCEPTION", "No valid audio data received. You may be using a device that can't record audio.");
       return;
     }
     finally {
@@ -267,7 +267,7 @@ class AudioRecorderManager extends ReactContextBaseJavaModule {
   @ReactMethod
   public void pauseRecording(Promise promise) {
     if (!isPauseResumeCapable || pauseMethod==null) {
-      logAndRejectPromise(promise, "RUNTIME_EXCEPTION", "Method not available on this version of Android.");
+    //  logAndRejectPromise(promise, "RUNTIME_EXCEPTION", "Method not available on this version of Android.");
       return;
     }
 
@@ -277,7 +277,7 @@ class AudioRecorderManager extends ReactContextBaseJavaModule {
         stopWatch.stop();
       } catch (InvocationTargetException | RuntimeException | IllegalAccessException e) {
         e.printStackTrace();
-        logAndRejectPromise(promise, "RUNTIME_EXCEPTION", "Method not available on this version of Android.");
+     //   logAndRejectPromise(promise, "RUNTIME_EXCEPTION", "Method not available on this version of Android.");
         return;
       }
     }
@@ -289,7 +289,7 @@ class AudioRecorderManager extends ReactContextBaseJavaModule {
   @ReactMethod
   public void resumeRecording(Promise promise) {
     if (!isPauseResumeCapable || resumeMethod == null) {
-      logAndRejectPromise(promise, "RUNTIME_EXCEPTION", "Method not available on this version of Android.");
+    //  logAndRejectPromise(promise, "RUNTIME_EXCEPTION", "Method not available on this version of Android.");
       return;
     }
 
@@ -299,7 +299,7 @@ class AudioRecorderManager extends ReactContextBaseJavaModule {
         stopWatch.start();
       } catch (InvocationTargetException | RuntimeException | IllegalAccessException e) {
         e.printStackTrace();
-        logAndRejectPromise(promise, "RUNTIME_EXCEPTION", "Method not available on this version of Android.");
+       // logAndRejectPromise(promise, "RUNTIME_EXCEPTION", "Method not available on this version of Android.");
         return;
       }
     }
