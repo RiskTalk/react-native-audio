@@ -112,7 +112,7 @@ class AudioRecorderManager extends ReactContextBaseJavaModule {
   @ReactMethod
   public void prepareRecordingAtPath(String recordingPath, ReadableMap recordingSettings, Promise promise) {
     if (isRecording){
-      logAndRejectPromise(promise, "INVALID_STATE", "Please call stopRecording before starting recording");
+     // logAndRejectPromise(promise, "INVALID_STATE", "Please call stopRecording before starting recording");
     }
     File destFile = new File(recordingPath);
     if (destFile.getParentFile() != null) {
