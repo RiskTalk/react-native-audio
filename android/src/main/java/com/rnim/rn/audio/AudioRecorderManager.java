@@ -65,7 +65,7 @@ class AudioRecorderManager extends ReactContextBaseJavaModule {
   private Method pauseMethod = null;
   private Method resumeMethod = null;
   private int recorderSecondsElapsed;
-
+  private int progressUpdateInterval = 1000;
 
   public AudioRecorderManager(ReactApplicationContext reactContext) {
     super(reactContext);
@@ -130,6 +130,7 @@ class AudioRecorderManager extends ReactContextBaseJavaModule {
       recorder.setAudioEncodingBitRate(recordingSettings.getInt("AudioEncodingBitRate"));
       recorder.setOutputFile(destFile.getPath());
       includeBase64 = recordingSettings.getBoolean("IncludeBase64");
+      setProgressUpdateInterval(recordingSettings.getInt("ProgressUpdateInterval"));
     }
     catch(final Exception e) {
     //  logAndRejectPromise(promise, "COULDNT_CONFIGURE_MEDIA_RECORDER" , "Make sure you've added RECORD_AUDIO permission to your AndroidManifest.xml file "+e.getMessage());
@@ -146,6 +147,43 @@ class AudioRecorderManager extends ReactContextBaseJavaModule {
 
   }
 
+  @ReactMethod
+  public void prepareRecordingForDuration(String recordingPath, ReadableMap recordingSettings, int duration, Promise promise) {
+    if (isRecording){
+      //logAndRejectPromise(promise, "INVALID_STATE", "Please call stopRecording before starting recording");
+    }
+    File destFile = new File(recordingPath);
+    if (destFile.getParentFile() != null) {
+      destFile.getParentFile().mkdirs();
+    }
+    recorder = new MediaRecorder();
+    try {
+      recorder.setAudioSource(recordingSettings.getInt("AudioSource"));
+      int outputFormat = getOutputFormatFromString(recordingSettings.getString("OutputFormat"));
+      recorder.setOutputFormat(outputFormat);
+      recorder.setMaxDuration(duration*1000);      
+      int audioEncoder = getAudioEncoderFromString(recordingSettings.getString("AudioEncoding"));
+      recorder.setAudioEncoder(audioEncoder);
+      recorder.setAudioSamplingRate(recordingSettings.getInt("SampleRate"));
+      recorder.setAudioChannels(recordingSettings.getInt("Channels"));
+      recorder.setAudioEncodingBitRate(recordingSettings.getInt("AudioEncodingBitRate"));
+      recorder.setOutputFile(destFile.getPath());
+      includeBase64 = recordingSettings.getBoolean("IncludeBase64");
+    }
+    catch(final Exception e) {
+     // logAndRejectPromise(promise, "COULDNT_CONFIGURE_MEDIA_RECORDER" , "Make sure you've added RECORD_AUDIO permission to your AndroidManifest.xml file "+e.getMessage());
+      return;
+    }
+
+    currentOutputFile = recordingPath;
+    try {
+      recorder.prepare();
+      promise.resolve(currentOutputFile);
+    } catch (final Exception e) {
+    //  logAndRejectPromise(promise, "COULDNT_PREPARE_RECORDING_AT_PATH "+recordingPath, e.getMessage());
+    }
+
+  }
   private int getAudioEncoderFromString(String audioEncoder) {
    switch (audioEncoder) {
      case "aac":
