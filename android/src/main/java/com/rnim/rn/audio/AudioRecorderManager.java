@@ -334,7 +334,7 @@ class AudioRecorderManager extends ReactContextBaseJavaModule {
           }
         });
       }
-    }, 0, progressUpdateInterval());
+    }, 0, progressUpdateInterval);
   }
 
   private void setProgressUpdateInterval(int progressUpdateInterval) {
