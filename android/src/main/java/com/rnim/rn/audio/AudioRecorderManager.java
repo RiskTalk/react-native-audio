@@ -146,44 +146,6 @@ class AudioRecorderManager extends ReactContextBaseJavaModule {
     }
 
   }
-
-  @ReactMethod
-  public void prepareRecordingForDuration(String recordingPath, ReadableMap recordingSettings, int duration, Promise promise) {
-    if (isRecording){
-      //logAndRejectPromise(promise, "INVALID_STATE", "Please call stopRecording before starting recording");
-    }
-    File destFile = new File(recordingPath);
-    if (destFile.getParentFile() != null) {
-      destFile.getParentFile().mkdirs();
-    }
-    recorder = new MediaRecorder();
-    try {
-      recorder.setAudioSource(recordingSettings.getInt("AudioSource"));
-      int outputFormat = getOutputFormatFromString(recordingSettings.getString("OutputFormat"));
-      recorder.setOutputFormat(outputFormat);
-      recorder.setMaxDuration(duration*1000);      
-      int audioEncoder = getAudioEncoderFromString(recordingSettings.getString("AudioEncoding"));
-      recorder.setAudioEncoder(audioEncoder);
-      recorder.setAudioSamplingRate(recordingSettings.getInt("SampleRate"));
-      recorder.setAudioChannels(recordingSettings.getInt("Channels"));
-      recorder.setAudioEncodingBitRate(recordingSettings.getInt("AudioEncodingBitRate"));
-      recorder.setOutputFile(destFile.getPath());
-      includeBase64 = recordingSettings.getBoolean("IncludeBase64");
-    }
-    catch(final Exception e) {
-     // logAndRejectPromise(promise, "COULDNT_CONFIGURE_MEDIA_RECORDER" , "Make sure you've added RECORD_AUDIO permission to your AndroidManifest.xml file "+e.getMessage());
-      return;
-    }
-
-    currentOutputFile = recordingPath;
-    try {
-      recorder.prepare();
-      promise.resolve(currentOutputFile);
-    } catch (final Exception e) {
-    //  logAndRejectPromise(promise, "COULDNT_PREPARE_RECORDING_AT_PATH "+recordingPath, e.getMessage());
-    }
-
-  }
   private int getAudioEncoderFromString(String audioEncoder) {
    switch (audioEncoder) {
      case "aac":
@@ -357,18 +319,31 @@ class AudioRecorderManager extends ReactContextBaseJavaModule {
             recorderSecondsElapsed++;
             WritableMap body = Arguments.createMap();
             body.putInt("currentTime", recorderSecondsElapsed/4);
-            int maxAmplitude = 0;
-            if (recorder != null) {
-              maxAmplitude = recorder.getMaxAmplitude();
+            int amplitude = recorder.getMaxAmplitude();
+            if (amplitude == 0) {
+              body.putInt("currentMetering", -160);
+            } else {
+              body.putInt("currentMetering", (int) (20 * Math.log(((double) amplitude) / 32767d)));
             }
-            body.putInt("currentMetering", maxAmplitude);
+            // int maxAmplitude = 0;
+            // if (recorder != null) {
+            //   maxAmplitude = recorder.getMaxAmplitude();
+            // }
+            // body.putInt("currentMetering", maxAmplitude);
             sendEvent("recordingProgress", body);
           }
         });
       }
-    }, 0, 250);
+    }, 0, progressUpdateInterval());
   }
 
+  private void setProgressUpdateInterval(int progressUpdateInterval) {
+    if(progressUpdateInterval < 100) {
+      this.progressUpdateInterval = 100;
+    } else {
+      this.progressUpdateInterval = progressUpdateInterval;
+    }
+  }
   private void stopTimer(){
     if (timer != null) {
       timer.cancel();
