@@ -65,7 +65,7 @@ class AudioRecorderManager extends ReactContextBaseJavaModule {
   private Method pauseMethod = null;
   private Method resumeMethod = null;
   private int recorderSecondsElapsed;
-  private int progressUpdateInterval = 100;
+  private int progressUpdateInterval = 250;
 
   public AudioRecorderManager(ReactApplicationContext reactContext) {
     super(reactContext);
@@ -333,11 +333,11 @@ class AudioRecorderManager extends ReactContextBaseJavaModule {
   }
 
   private void setProgressUpdateInterval(int progressUpdateInterval) {
-    if(progressUpdateInterval < 100) {
-      this.progressUpdateInterval = 100;
-    } else {
+    // if(progressUpdateInterval < 100) {
+    //   this.progressUpdateInterval = 100;
+    // } else {
       this.progressUpdateInterval = progressUpdateInterval;
-    }
+    // }
   }
   private void stopTimer(){
     if (timer != null) {
