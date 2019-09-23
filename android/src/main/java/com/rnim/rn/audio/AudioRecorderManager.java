@@ -312,7 +312,8 @@ class AudioRecorderManager extends ReactContextBaseJavaModule {
     timer = new Timer();
     timer.scheduleAtFixedRate(new TimerTask() {
       @Override
-      if (!isPaused) {
+      public void run() {
+        if (!isPaused) {
           WritableMap body = Arguments.createMap();
           body.putDouble("currentTime", stopWatch.getTimeSeconds());
 
@@ -328,7 +329,6 @@ class AudioRecorderManager extends ReactContextBaseJavaModule {
       }
     }, 0, progressUpdateInterval);
   }
-
   private void setProgressUpdateInterval(int progressUpdateInterval) {
     if(progressUpdateInterval < 100) {
       this.progressUpdateInterval = 100;
