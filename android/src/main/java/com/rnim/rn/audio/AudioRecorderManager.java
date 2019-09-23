@@ -65,7 +65,7 @@ class AudioRecorderManager extends ReactContextBaseJavaModule {
   private Method pauseMethod = null;
   private Method resumeMethod = null;
   private int recorderSecondsElapsed;
-  private int progressUpdateInterval = 100;
+  private int progressUpdateInterval = 1000;
 
   public AudioRecorderManager(ReactApplicationContext reactContext) {
     super(reactContext);
@@ -312,32 +312,47 @@ class AudioRecorderManager extends ReactContextBaseJavaModule {
     timer = new Timer();
     timer.scheduleAtFixedRate(new TimerTask() {
       @Override
-      public void run() {
-        AudioRecorderManager.this.getReactApplicationContext().runOnNativeModulesQueueThread(new Runnable() {
-          @Override
-          public void run() {
-            recorderSecondsElapsed++;
-            WritableMap body = Arguments.createMap();
-            body.putInt("currentTime", recorderSecondsElapsed/4);
-            int amplitude = recorder.getMaxAmplitude();
-            if (amplitude == 0) {
-              body.putInt("currentMetering", -160);
-            } else {
-              body.putInt("currentMetering", (int) (20 * Math.log(((double) amplitude) / 32767d)));
-            }
-            sendEvent("recordingProgress", body);
+      if (!isPaused) {
+          WritableMap body = Arguments.createMap();
+          body.putDouble("currentTime", stopWatch.getTimeSeconds());
+
+          int amplitude = recorder.getMaxAmplitude();
+          if (amplitude == 0) {
+            body.putInt("currentMetering", -160);
+          } else {
+            body.putInt("currentMetering", (int) (20 * Math.log(((double) amplitude) / 32767d)));
           }
-        });
+
+          sendEvent("recordingProgress", body);
+        }
       }
     }, 0, progressUpdateInterval);
+    //   public void run() {
+    //     AudioRecorderManager.this.getReactApplicationContext().runOnNativeModulesQueueThread(new Runnable() {
+    //       @Override
+    //       public void run() {
+    //         recorderSecondsElapsed++;
+    //         WritableMap body = Arguments.createMap();
+    //         body.putInt("currentTime", recorderSecondsElapsed/4);
+    //         int amplitude = recorder.getMaxAmplitude();
+    //         if (amplitude == 0) {
+    //           body.putInt("currentMetering", -160);
+    //         } else {
+    //           body.putInt("currentMetering", (int) (20 * Math.log(((double) amplitude) / 32767d)));
+    //         }
+    //         sendEvent("recordingProgress", body);
+    //       }
+    //     });
+    //   }
+    // }, 0, progressUpdateInterval);
   }
 
   private void setProgressUpdateInterval(int progressUpdateInterval) {
-    // if(progressUpdateInterval < 100) {
-    //   this.progressUpdateInterval = 100;
-    // } else {
+    if(progressUpdateInterval < 100) {
+      this.progressUpdateInterval = 100;
+    } else {
       this.progressUpdateInterval = progressUpdateInterval;
-    // }
+    }
   }
   private void stopTimer(){
     if (timer != null) {
