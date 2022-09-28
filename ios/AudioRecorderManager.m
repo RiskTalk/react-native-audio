@@ -269,8 +269,6 @@ RCT_EXPORT_METHOD(prepareRecordingAtPath:(NSString *)path sampleRate:(float)samp
     _resumeOnInterruptionEnd = resumeOnInterruptionEnd;
   }
 
-  NSError *error = nil;
-
   _recordSession = [AVAudioSession sharedInstance];
   [[NSNotificationCenter defaultCenter] addObserver:self
                                          selector:@selector(audioSessionInterruptionNotification:)
