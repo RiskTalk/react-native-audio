@@ -163,7 +163,7 @@ RCT_EXPORT_MODULE();
   }
 }
 
-RCT_EXPORT_METHOD(prepareRecordingAtPath:(NSString *)path sampleRate:(float)sampleRate channels:(nonnull NSNumber *)channels quality:(NSString *)quality encoding:(NSString *)encoding meteringEnabled:(BOOL)meteringEnabled measurementMode:(BOOL)measurementMode includeBase64:(BOOL)includeBase64 resumeOnInterruptionEnd:(BOOL)resumeOnInterruptionEnd)
+RCT_EXPORT_METHOD(prepareRecordingAtPath:(NSString *)path sampleRate:(float)sampleRate channels:(nonnull NSNumber *)channels quality:(NSString *)quality encoding:(NSString *)encoding meteringEnabled:(BOOL)meteringEnabled measurementMode:(BOOL)measurementMode includeBase64:(BOOL)includeBase64)
 {
   // Allow to execute actions when the app is not in foreground
   [[UIApplication sharedApplication] beginReceivingRemoteControlEvents];
@@ -263,10 +263,6 @@ RCT_EXPORT_METHOD(prepareRecordingAtPath:(NSString *)path sampleRate:(float)samp
 
   if (includeBase64) {
     _includeBase64 = includeBase64;
-  }
-
-  if (resumeOnInterruptionEnd != nil && resumeOnInterruptionEnd != YES) {
-    _resumeOnInterruptionEnd = resumeOnInterruptionEnd;
   }
 
   _recordSession = [AVAudioSession sharedInstance];
